@@ -1,0 +1,61 @@
+# Builds docker image and pushes it onto the fliqa.azurecr.io repository
+# From there an image can be deployed manually
+#
+# Each docker image is tagged with:
+# * version + build_date
+#
+# and either:
+# * :latest - is production ready build will be deployed by hand or automatically when Kubernetes recycles pods
+# * :test   - is only for testing purposes to be deployed on test only
+#
+name: Lago-Front Docker build / Fliqa flavour
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Lago version"
+        required: true
+        default: 1.20.0
+
+      tag:
+        description: "Docker tag (test for testing, latest for production)"
+        required: true
+        type: choice
+        options:
+          - test
+          - latest
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Log in to Azure Container Registry
+        run: |
+          az acr login --name fliqa
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Set selected tag
+        run: |
+          echo "TAG=${{ github.event.inputs.tag }}" >> $GITHUB_ENV 
+          echo "LAGO_VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV 
+
+      - name: Build and push Docker image
+        run: |
+          echo "GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
+          docker build --file ./Dockerfile  \
+            --tag fliqa.azurecr.io/obp/lago-front:${{ env.LAGO_VERSION }}  \
+            --tag fliqa.azurecr.io/obp/lago-front:${{ env.TAG }}  \
+            --push .
