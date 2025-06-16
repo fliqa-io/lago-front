@@ -8,7 +8,7 @@
 # * :latest - is production ready build will be deployed by hand or automatically when Kubernetes recycles pods
 # * :test   - is only for testing purposes to be deployed on test only
 #
-name: Lago-Front Docker build / Fliqa flavour
+name: Lago-Front Docker to Azure / Fliqa flavour
 
 on:
   workflow_dispatch:

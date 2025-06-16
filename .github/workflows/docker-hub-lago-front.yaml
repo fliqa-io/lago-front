@@ -1,4 +1,4 @@
-name: Lago-Front to Docker Hub  / Fliqa flavour
+name: Lago-Front Docker to DockerHub  / Fliqa flavour
 
 on:
   workflow_dispatch:
