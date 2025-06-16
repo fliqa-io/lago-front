@@ -44,6 +44,7 @@ jobs:
         run: |
           docker buildx build . \
             --file Dockerfile \
+            --platform linux/amd64,linux/arm64 \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/lagofront:${{ env.LAGO_VERSION }} \
             --tag ${{ secrets.DOCKERHUB_USERNAME }}/lagofront:${{ env.TAG }} \
             --push
